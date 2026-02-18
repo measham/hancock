@@ -193,6 +193,7 @@
       <div class="panel">
         <h2>Control points</h2>
         <div id="pointsList" class="points-list"></div>
+        <button type="button" id="removeLastPoint" title="Remove the last added control point">Remove last</button>
         <button type="button" id="clearPoints" class="danger">Clear all</button>
       </div>
       <div class="panel">
@@ -217,6 +218,7 @@
       const pxYInput = document.getElementById('pxY');
       const addBtn = document.getElementById('addPoint');
       const pointsList = document.getElementById('pointsList');
+      const removeLastBtn = document.getElementById('removeLastPoint');
       const clearBtn = document.getElementById('clearPoints');
       const exportBtn = document.getElementById('exportJson');
       const imgSizeEl = document.getElementById('imgSize');
@@ -371,6 +373,13 @@
           btn.addEventListener('click', () => removePoint(parseInt(btn.dataset.index, 10)));
         });
       }
+
+      removeLastBtn.addEventListener('click', () => {
+        if (!controlPoints.length) return;
+        controlPoints.pop();
+        renderPointsList();
+        redrawMarkers();
+      });
 
       clearBtn.addEventListener('click', () => {
         if (controlPoints.length && !confirm('Clear all control points?')) return;
