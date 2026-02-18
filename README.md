@@ -1,6 +1,6 @@
-# Explore — Portrait 4K projection visual
+# Hancock — Explore
 
-Local, real-time projection piece at **3050×3840** (portrait): fixed background map with ~9,000 archaeological finds plotted from lat/lon, animated point reveal, and timed overlay panels.
+Portrait 4K projection visual: fixed background map with ~9,000 archaeological finds plotted from lat/lon, animated point reveal, and timed overlay panels. Canvas **3050×3840**.
 
 ## Quick start
 
