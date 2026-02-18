@@ -141,6 +141,7 @@
     }
     button:hover { background: rgba(74, 158, 255, 0.15); }
     button.danger { border-color: var(--danger); color: var(--danger); }
+    button.danger:hover { background: rgba(224, 96, 96, 0.15); }
     .points-list {
       max-height: 200px;
       overflow-y: auto;
@@ -154,6 +155,7 @@
       border-bottom: 1px solid var(--border);
     }
     .point-row button { width: auto; padding: 4px 8px; margin: 0; }
+    .control-point-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
     .meta { font-size: 0.75rem; color: #888; margin-top: 8px; }
   </style>
 </head>
@@ -193,8 +195,10 @@
       <div class="panel">
         <h2>Control points</h2>
         <div id="pointsList" class="points-list"></div>
-        <button type="button" id="removeLastPoint" title="Remove the last added control point">Remove last</button>
-        <button type="button" id="clearPoints" class="danger">Clear all</button>
+        <div class="control-point-actions">
+          <button type="button" id="removeLastPoint" class="danger" title="Remove the last added control point">Remove last</button>
+          <button type="button" id="clearPoints" class="danger">Clear all</button>
+        </div>
       </div>
       <div class="panel">
         <h2>Export</h2>
