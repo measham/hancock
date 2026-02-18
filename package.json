@@ -1,0 +1,20 @@
+{
+  "name": "explore-4k-projection",
+  "version": "1.0.0",
+  "description": "Portrait 4K projection visual for archaeological finds map",
+  "type": "module",
+  "scripts": {
+    "convert": "node convert-finds-to-pixels.mjs",
+    "convert:sample": "node convert-finds-to-pixels.mjs ./north_east_finds_optimized.json",
+    "playback": "npx serve -p 3333",
+    "calibrate": "npx serve -p 3334"
+  },
+  "dependencies": {
+    "d3-geo": "^3.1.0",
+    "gsap": "^3.12.5",
+    "pixi.js": "^8.0.0"
+  },
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

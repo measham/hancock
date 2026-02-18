@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map calibration — control points</title>
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --surface: #2a2a2a;
+      --border: #444;
+      --text: #e0e0e0;
+      --accent: #4a9eff;
+      --danger: #e06060;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      min-height: 100vh;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 12px 0; }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 16px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .map-wrap {
+      position: relative;
+      background: var(--surface);
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .map-wrap .scroll {
+      overflow: auto;
+      width: 100%;
+      max-height: calc(100vh - 120px);
+    }
+    .map-img {
+      display: block;
+      cursor: crosshair;
+      vertical-align: top;
+      /* No max-width: image keeps natural size (3050px) so horizontal scroll works */
+    }
+    .scroll { position: relative; }
+    .map-content {
+      position: relative;
+      display: block;
+    }
+    .map-inner {
+      position: relative;
+      width: 3050px;
+      height: 3840px;
+      transform-origin: 0 0;
+    }
+    .zoom-controls {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      z-index: 2;
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px;
+    }
+    .zoom-controls button {
+      width: 32px;
+      height: 32px;
+      padding: 0;
+      margin: 0;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .zoom-controls span {
+      align-self: center;
+      font-size: 0.8rem;
+      min-width: 3.5em;
+      text-align: center;
+    }
+    .markers {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    .marker {
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      margin: -8px 0 0 -8px;
+      border: 2px solid var(--accent);
+      border-radius: 50%;
+      background: rgba(74, 158, 255, 0.3);
+      font-size: 10px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+    .panel h2 { font-size: 0.9rem; margin: 0 0 8px 0; }
+    label { display: block; margin-bottom: 4px; font-size: 0.85rem; }
+    input, button {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+    input[readonly] { opacity: 0.8; cursor: default; }
+    button {
+      cursor: pointer;
+      border-color: var(--accent);
+      color: var(--accent);
+      margin-bottom: 0;
+    }
+    button:hover { background: rgba(74, 158, 255, 0.15); }
+    button.danger { border-color: var(--danger); color: var(--danger); }
+    .points-list {
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.8rem;
+    }
+    .point-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .point-row button { width: auto; padding: 4px 8px; margin: 0; }
+    .meta { font-size: 0.75rem; color: #888; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <h1>Map calibration — control points (3050×3840)</h1>
+  <div class="layout">
+    <div class="map-wrap">
+      <div class="zoom-controls">
+        <button type="button" id="zoomOut" title="Zoom out">−</button>
+        <span id="zoomLabel">100%</span>
+        <button type="button" id="zoomIn" title="Zoom in">+</button>
+      </div>
+      <div class="scroll" id="scrollContainer">
+        <div class="map-content" id="mapContent">
+          <div class="map-inner" id="mapInner">
+            <img id="mapImg" class="map-img" src="map-portrait-4k.png" alt="Map at 3050×3840">
+            <div id="markers" class="markers"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar">
+      <div class="panel">
+        <h2>Click on map</h2>
+        <label>Name</label>
+        <input type="text" id="name" placeholder="e.g. Newcastle upon Tyne">
+        <label>Latitude</label>
+        <input type="number" id="lat" step="any" placeholder="54.9783">
+        <label>Longitude</label>
+        <input type="number" id="lon" step="any" placeholder="-1.6178">
+        <label>X (image px)</label>
+        <input type="number" id="pxX" readonly>
+        <label>Y (image px)</label>
+        <input type="number" id="pxY" readonly>
+        <button type="button" id="addPoint">Add control point</button>
+      </div>
+      <div class="panel">
+        <h2>Control points</h2>
+        <div id="pointsList" class="points-list"></div>
+        <button type="button" id="clearPoints" class="danger">Clear all</button>
+      </div>
+      <div class="panel">
+        <h2>Export</h2>
+        <button type="button" id="exportJson">Export controls.json</button>
+        <p class="meta">Image size: <span id="imgSize">—</span>. Coordinates are in full 3050×3840 space.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const MAP_WIDTH = 3050;
+      const MAP_HEIGHT = 3840;
+
+      const mapImg = document.getElementById('mapImg');
+      const markersEl = document.getElementById('markers');
+      const nameInput = document.getElementById('name');
+      const latInput = document.getElementById('lat');
+      const lonInput = document.getElementById('lon');
+      const pxXInput = document.getElementById('pxX');
+      const pxYInput = document.getElementById('pxY');
+      const addBtn = document.getElementById('addPoint');
+      const pointsList = document.getElementById('pointsList');
+      const clearBtn = document.getElementById('clearPoints');
+      const exportBtn = document.getElementById('exportJson');
+      const imgSizeEl = document.getElementById('imgSize');
+      const scrollContainer = document.getElementById('scrollContainer');
+      const mapContent = document.getElementById('mapContent');
+      const mapInner = document.getElementById('mapInner');
+      const zoomLabel = document.getElementById('zoomLabel');
+      const zoomInBtn = document.getElementById('zoomIn');
+      const zoomOutBtn = document.getElementById('zoomOut');
+
+      let controlPoints = [];
+      const MIN_ZOOM = 0.25;
+      const MAX_ZOOM = 3;
+      const ZOOM_STEP = 0.25;
+      let zoomLevel = 1;
+
+      function applyZoom(level) {
+        zoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, level));
+        mapContent.style.width = (MAP_WIDTH * zoomLevel) + 'px';
+        mapContent.style.height = (MAP_HEIGHT * zoomLevel) + 'px';
+        mapInner.style.transform = 'scale(' + zoomLevel + ')';
+        zoomLabel.textContent = Math.round(zoomLevel * 100) + '%';
+      }
+
+      function zoomTowardPoint(delta, clientX, clientY) {
+        const rect = scrollContainer.getBoundingClientRect();
+        const contentX = scrollContainer.scrollLeft + (clientX - rect.left);
+        const contentY = scrollContainer.scrollTop + (clientY - rect.top);
+        const newLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel + delta));
+        applyZoom(newLevel);
+        scrollContainer.scrollLeft = contentX - (clientX - rect.left);
+        scrollContainer.scrollTop = contentY - (clientY - rect.top);
+      }
+
+      scrollContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = -Math.sign(e.deltaY) * ZOOM_STEP;
+        zoomTowardPoint(delta, e.clientX, e.clientY);
+      }, { passive: false });
+
+      zoomInBtn.addEventListener('click', () => {
+        const rect = scrollContainer.getBoundingClientRect();
+        const centerX = scrollContainer.scrollLeft + rect.width / 2;
+        const centerY = scrollContainer.scrollTop + rect.height / 2;
+        applyZoom(zoomLevel + ZOOM_STEP);
+        scrollContainer.scrollLeft = centerX - rect.width / 2;
+        scrollContainer.scrollTop = centerY - rect.height / 2;
+      });
+      zoomOutBtn.addEventListener('click', () => {
+        const rect = scrollContainer.getBoundingClientRect();
+        const centerX = scrollContainer.scrollLeft + rect.width / 2;
+        const centerY = scrollContainer.scrollTop + rect.height / 2;
+        applyZoom(zoomLevel - ZOOM_STEP);
+        scrollContainer.scrollLeft = centerX - rect.width / 2;
+        scrollContainer.scrollTop = centerY - rect.height / 2;
+      });
+
+      applyZoom(1);
+
+      function getImagePixelFromEvent(e) {
+        const img = mapImg;
+        const rect = img.getBoundingClientRect();
+        const scaleX = img.naturalWidth / rect.width;
+        const scaleY = img.naturalHeight / rect.height;
+        const x = Math.round((e.clientX - rect.left) * scaleX);
+        const y = Math.round((e.clientY - rect.top) * scaleY);
+        return { x: Math.max(0, Math.min(MAP_WIDTH, x)), y: Math.max(0, Math.min(MAP_HEIGHT, y)) };
+      }
+
+      function updateMarkers() {
+        if (!mapImg.naturalWidth) return;
+        const scaleX = mapImg.offsetWidth / mapImg.naturalWidth;
+        const scaleY = mapImg.offsetHeight / mapImg.naturalHeight;
+        markersEl.innerHTML = controlPoints.map((p, i) => {
+          const el = document.createElement('div');
+          el.className = 'marker';
+          el.textContent = i + 1;
+          el.style.left = (p.x * scaleX) + 'px';
+          el.style.top = (p.y * scaleY) + 'px';
+          return el;
+        }).join('');
+        markersEl.innerHTML && markersEl.querySelectorAll('.marker').forEach((el, i) => {
+          const div = document.createElement('div');
+          div.className = 'marker';
+          div.textContent = i + 1;
+          div.style.left = (controlPoints[i].x * scaleX) + 'px';
+          div.style.top = (controlPoints[i].y * scaleY) + 'px';
+          markersEl.appendChild(div);
+        });
+      }
+
+      function redrawMarkers() {
+        markersEl.innerHTML = '';
+        if (!mapImg.naturalWidth) return;
+        const scaleX = mapImg.offsetWidth / mapImg.naturalWidth;
+        const scaleY = mapImg.offsetHeight / mapImg.naturalHeight;
+        controlPoints.forEach((p, i) => {
+          const div = document.createElement('div');
+          div.className = 'marker';
+          div.textContent = i + 1;
+          div.style.left = (p.x * scaleX) + 'px';
+          div.style.top = (p.y * scaleY) + 'px';
+          markersEl.appendChild(div);
+        });
+      }
+
+      mapImg.addEventListener('click', (e) => {
+        const { x, y } = getImagePixelFromEvent(e);
+        pxXInput.value = x;
+        pxYInput.value = y;
+      });
+
+      mapImg.addEventListener('load', () => {
+        imgSizeEl.textContent = mapImg.naturalWidth + '×' + mapImg.naturalHeight;
+        redrawMarkers();
+      });
+      if (mapImg.complete && mapImg.naturalWidth) {
+        imgSizeEl.textContent = mapImg.naturalWidth + '×' + mapImg.naturalHeight;
+      }
+
+      addBtn.addEventListener('click', () => {
+        const x = parseInt(pxXInput.value, 10);
+        const y = parseInt(pxYInput.value, 10);
+        const lat = parseFloat(latInput.value);
+        const lon = parseFloat(lonInput.value);
+        const name = (nameInput.value || '').trim() || 'Point ' + (controlPoints.length + 1);
+        if (isNaN(x) || isNaN(y)) {
+          alert('Click on the map first to set X, Y.');
+          return;
+        }
+        if (isNaN(lat) || isNaN(lon)) {
+          alert('Enter valid lat and lon.');
+          return;
+        }
+        controlPoints.push({ name, lat, lon, x, y });
+        nameInput.value = '';
+        latInput.value = '';
+        lonInput.value = '';
+        pxXInput.value = '';
+        pxYInput.value = '';
+        renderPointsList();
+        redrawMarkers();
+      });
+
+      function removePoint(index) {
+        controlPoints.splice(index, 1);
+        renderPointsList();
+        redrawMarkers();
+      }
+
+      function renderPointsList() {
+        pointsList.innerHTML = controlPoints.map((p, i) =>
+          '<div class="point-row">' +
+          '<span>' + (p.name || 'Unnamed') + ' (' + p.x + ',' + p.y + ')</span>' +
+          '<button type="button" data-index="' + i + '">Remove</button></div>'
+        ).join('');
+        pointsList.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => removePoint(parseInt(btn.dataset.index, 10)));
+        });
+      }
+
+      clearBtn.addEventListener('click', () => {
+        if (controlPoints.length && !confirm('Clear all control points?')) return;
+        controlPoints = [];
+        renderPointsList();
+        redrawMarkers();
+      });
+
+      exportBtn.addEventListener('click', () => {
+        if (!controlPoints.length) {
+          alert('Add at least one control point.');
+          return;
+        }
+        const json = JSON.stringify(controlPoints, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'controls.json';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+    })();
+  </script>
+</body>
+</html>
