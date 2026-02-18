@@ -250,12 +250,6 @@
         scrollContainer.scrollTop = contentY - (clientY - rect.top);
       }
 
-      scrollContainer.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        const delta = -Math.sign(e.deltaY) * ZOOM_STEP;
-        zoomTowardPoint(delta, e.clientX, e.clientY);
-      }, { passive: false });
-
       zoomInBtn.addEventListener('click', () => {
         const rect = scrollContainer.getBoundingClientRect();
         const centerX = scrollContainer.scrollLeft + rect.width / 2;

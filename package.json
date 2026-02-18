@@ -4,6 +4,7 @@
   "description": "Portrait 4K projection visual for archaeological finds map",
   "type": "module",
   "scripts": {
+    "push": "git add -A && git commit -m \"Updates\" && git push",
     "convert": "node convert-finds-to-pixels.mjs",
     "convert:sample": "node convert-finds-to-pixels.mjs ./north_east_finds_optimized.json",
     "playback": "npx serve -p 3333",
