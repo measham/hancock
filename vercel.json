@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/calibrate", "destination": "/calibrate.html" },
+    { "source": "/", "destination": "/index.html" }
+  ]
+}
