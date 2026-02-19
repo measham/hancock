@@ -3,7 +3,7 @@
 ## Running the playback app
 
 1. **Prepare assets**
-   - `map-portrait-4k.png` (3050×3840) in the project root.
+   - `map-portrait-4k.png` (2160×3840) in the project root.
    - `points_pixels.json` (from the conversion script).
    - Optional: `controls.json` (for debug control-point overlay).
 
@@ -14,8 +14,8 @@
    Then open **http://localhost:3333** in a browser.
 
 3. **Resolution**
-   - The canvas is fixed at **3050×3840**. The browser may scale it to fit the window; for true 1:1 pixels, run in fullscreen on a display set to 3050×3840 (portrait), or use an Electron wrapper that locks resolution.
-   - Fallback: if the machine cannot output 3050×3840, scale the stage accordingly (e.g. change `STAGE_WIDTH`/`STAGE_HEIGHT` and use a proportionally scaled map).
+   - The canvas is fixed at **2160×3840**. The browser may scale it to fit the window; for true 1:1 pixels, run in fullscreen on a display set to 2160×3840 (portrait), or use an Electron wrapper that locks resolution.
+   - Fallback: if the machine cannot output 2160×3840, scale the stage accordingly (e.g. change `STAGE_WIDTH`/`STAGE_HEIGHT` and use a proportionally scaled map).
 
 ## Keyboard controls (debug)
 
@@ -36,7 +36,7 @@
 
 ## Show day checklist
 
-- [ ] **Display**: Projector (or output) set to **portrait** orientation and correct resolution (3050×3840).
+- [ ] **Display**: Projector (or output) set to **portrait** orientation and correct resolution (2160×3840).
 - [ ] **OS**: Disable sleep, screensaver, and (if possible) notifications.
 - [ ] **Browser**: Run in fullscreen/kiosk; ensure no zoom (100%) and no browser scaling of the canvas.
 - [ ] **Offline**: If the app is served from a local server, ensure all assets (map, JSON, and optionally GSAP/Pixi from local copies) are available without internet.

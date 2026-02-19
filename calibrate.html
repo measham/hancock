@@ -47,7 +47,7 @@
     .map-img {
       display: block;
       cursor: crosshair;
-      /* No max-width: image keeps natural size (3050px) so horizontal scroll works */
+      /* No max-width: image keeps natural size (2160px) so horizontal scroll works */
     }
     .scroll { position: relative; }
     .map-content {
@@ -56,7 +56,7 @@
     }
     .map-inner {
       position: relative;
-      width: 3050px;
+      width: 2160px;
       height: 3840px;
       transform-origin: 0 0;
     }
@@ -160,7 +160,7 @@
   </style>
 </head>
 <body>
-  <h1>Map calibration — control points (3050×3840)</h1>
+  <h1>Map calibration — control points (2160×3840)</h1>
   <div class="layout">
     <div class="map-wrap">
       <div class="zoom-controls">
@@ -171,7 +171,7 @@
       <div class="scroll" id="scrollContainer">
         <div class="map-content" id="mapContent">
           <div class="map-inner" id="mapInner">
-            <img id="mapImg" class="map-img" src="map-portrait-4k.png" alt="Map at 3050×3840">
+            <img id="mapImg" class="map-img" src="map-portrait-4k.png" alt="Map at 2160×3840">
             <div id="markers" class="markers"></div>
           </div>
         </div>
@@ -203,14 +203,14 @@
       <div class="panel">
         <h2>Export</h2>
         <button type="button" id="exportJson">Export controls.json</button>
-        <p class="meta">Image size: <span id="imgSize">—</span>. Coordinates are in full 3050×3840 space.</p>
+        <p class="meta">Image size: <span id="imgSize">—</span>. Coordinates are in full 2160×3840 space.</p>
       </div>
     </div>
   </div>
 
   <script>
     (function () {
-      const MAP_WIDTH = 3050;
+      const MAP_WIDTH = 2160;
       const MAP_HEIGHT = 3840;
 
       const mapImg = document.getElementById('mapImg');

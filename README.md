@@ -1,10 +1,10 @@
 # Hancock — Explore
 
-Portrait 4K projection visual: fixed background map with ~9,000 archaeological finds plotted from lat/lon, animated point reveal, and timed overlay panels. Canvas **3050×3840**.
+Portrait 4K projection visual: fixed background map with ~9,000 archaeological finds plotted from lat/lon, animated point reveal, and timed overlay panels. Canvas **2160×3840** (portrait 4K for ~5m height projection).
 
 ## Quick start
 
-1. **Map artwork**: Add `map-portrait-4k.png` (3050×3840) to the project root. This is the background used by both the calibration tool and the playback app.
+1. **Map artwork**: Add `map-portrait-4k.png` (2160×3840) to the project root. This is the background used by both the calibration tool and the playback app.
 2. **Calibrate** (if you need to recalibrate): Open `calibrate.html`, add 8–12 control points, export `controls.json`. See [docs/CALIBRATION.md](docs/CALIBRATION.md).
 3. **Convert**: `npm run convert` (uses `finds.json` and `controls.json`, writes `points_pixels.json`). To use another finds file: `node convert-finds-to-pixels.mjs path/to/finds.json`. See [docs/CONVERSION.md](docs/CONVERSION.md).
 4. **Playback**: `npm run playback` then open http://localhost:3333. See [docs/PLAYBACK.md](docs/PLAYBACK.md).
@@ -13,7 +13,7 @@ Portrait 4K projection visual: fixed background map with ~9,000 archaeological f
 
 | Item | Description |
 |------|-------------|
-| **Playback app** | `index.html` + `app.js` — PixiJS stage 3050×3840, background layer, WebGL points layer, overlay layer, GSAP timeline. |
+| **Playback app** | `index.html` + `app.js` — PixiJS stage 2160×3840, background layer, WebGL points layer, overlay layer, GSAP timeline. |
 | **Calibration tool** | `calibrate.html` — Load map, click for pixel coords, add name/lat/lon, export `controls.json`. |
 | **Conversion script** | `convert-finds-to-pixels.mjs` — Node; reads finds + controls, outputs `points_pixels.json` with affine fit and jitter. |
 | **Docs** | `docs/CALIBRATION.md`, `docs/CONVERSION.md`, `docs/PLAYBACK.md` (and this README). |

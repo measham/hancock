@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const STAGE_WIDTH = 3050;
+  const STAGE_WIDTH = 2160;
   const STAGE_HEIGHT = 3840;
   const POINTS_FADE_START = 0.2;
   const POINTS_FADE_END = 2.0;
